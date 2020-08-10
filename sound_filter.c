@@ -35,9 +35,8 @@ struct wave_header *header;
 //void read(FILE *fp,int buff
 int main(int argc,char *argv[]){
 	FILE *fp;
-	//char *buff;
 	header = malloc(sizeof(struct wave_header));
-	
+	data = malloc(sizeof(struct wave_data));	
 	fp = fopen(argv[argc-1],"rb");
 	if(fp==NULL){
 		printf("Cannot open file\n");
@@ -47,26 +46,38 @@ int main(int argc,char *argv[]){
 	//Reading header 
 	fread(header,1,sizeof(header),fp);
 	fread(data,1,sizeof(data),fp);
-	//char buff[dara->subchank2Size];	
-	//Reading data
-	int buff[header->numChannels][data->subchunk2Size];
-	while(!feof(fp)){
-		/*if(header->bitsPerSample == 8){
-			
-		}
-		if(header->bitsPerSample == 16){
 		
-		}
-		if(header->bitsPerSample == 32){
-			
-		}*/
+	//allocating memory for storing data
+	//float buff[header->numChannels][data->subchunk2Size];
+	int** buff;
+	for(int i=0;i<header->numChannels+1;i++){
+		buff[i] = (int *)malloc((header->numChannels+1)*data->subchunk2Size);
 	}
 
-	printf("%s\n",header->chunkID);
-	printf("%d\n",header->chunkSize);
-	printf("%s\n",header->format);	
-	
+	//Reading the sound 
+	while(1){
+		for(int i=0;i<header->numChannels+1;i++){
+			fread(buff[i],sizeof(int),(header->numChannels+1)*data->subchunk2Size,fp);
+		}	
+		
+		if(feof(fp)){
+			break;
+		}
+	}
+	printf("%d\n",buff[0][443223]);
+
+	printf("%d\n",data->subchunk2Size);
+	printf("%d\n",header->audioFormat);
+	printf("%d\n",header->sampleRate);
+	printf("%d\n",header->blockAlign);
+	printf("%d\n",header->bitsPerSample);
 	fclose(fp);
+	//free memory after use
+	free(header);
+	free(data);
+	for(int i=0;i<header->numChannels+1;i++){
+		free(buff[i]);
+	}
 	printf("%d,%s",argc,*argv);	
 	return 0;
 }
